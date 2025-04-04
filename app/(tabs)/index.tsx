@@ -1,74 +1,77 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useEffect } from 'react';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { setTasks, toggleTask, removeTask} from '../../src/features/tasks/tasksSlice';
+import { getAllTasks, toggleTaskStatus, deleteTask } from '../../src/db/database';
+import { RootState } from '../../src/store';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+  const pendingCount = useSelector((state: any) => state.tasks.pendingCount);
+
+  useEffect(() => {
+    getAllTasks().then(fetched => {
+      dispatch(setTasks(fetched));
+    });
+  }, []);
+
+  const handleToggle = (id: number) => {
+    dispatch(toggleTask(id));
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+      toggleTaskStatus(id, !task.completed);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    deleteTask(id);
+    dispatch(removeTask(id));
+  };
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={{ flex: 1, backgroundColor: '#c4e7ff'}}>
+      <Text style={{fontSize: 24,fontWeight: "bold", textAlign: "center", marginTop: 40, color: "#000"}}>ODOT List</Text>
+      <Text style={{fontSize: 16, textAlign: "center",color: "#000",marginBottom: 10}}>4th March 2018</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 20 }}>
+        <Text style={{ fontSize: 20 }}>Невиконано: {pendingCount}</Text>
+      </View>
+      <FlatList
+        data={tasks}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleToggle(item.id)}>
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: item.completed ? '#cfc' : '#fcc',
+                marginVertical: 4,
+                borderRadius: 8,
+              }}>
+              <Text style={{ fontWeight: 'bold' }}>{item.todo}</Text>
+              <Text>📅 Deadline: {item.deadline}</Text>
+              <Text>⚡ Priority: {item.priority}</Text>
+              <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                  <Text style={{ color: 'red' }}>Видалити</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+      <TouchableOpacity
+        onPress={() => router.push('/(tabs)/add')}
+        style={{
+          position: 'absolute',
+          bottom: 20,
+          right: 20,
+          backgroundColor: 'blue',
+          padding: 15,
+          borderRadius: 50,
+        }}>
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
