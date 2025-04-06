@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { useDispatch } from 'react-redux';
-import { addTask } from '../../src/features/tasks/tasksSlice';
-import { insertTask } from '../../src/db/database';
 import { Task } from '../../src/types';
 import { useRouter } from 'expo-router';
 import { scheduleTaskNotification } from '../../src/utils/notifications'; 
+import { useTaskActions } from '../../src/hooks/useTaskActions';
 export default function AddTaskScreen() {
-  const dispatch = useDispatch();
   const router = useRouter();
+ 
 
   const [todo, setTodo] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [deadline, setDeadline] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const { handleAddTask} = useTaskActions();
 
-  const handleAddTask = async () => {
+  const handleAddTaskk = async () => {
     if (!todo.trim()) {
       Alert.alert('Помилка', 'Назва завдання не може бути порожньою');
       return;
@@ -36,14 +34,11 @@ export default function AddTaskScreen() {
       notificationId,
     };
 
-    insertTask(newTask);
-    dispatch(addTask(newTask));
+    handleAddTask(newTask);
 
     Alert.alert('Готово', 'Завдання додано!');
     router.back();
   };
-  
-
   
 
   return (
@@ -66,7 +61,7 @@ export default function AddTaskScreen() {
       </TouchableOpacity>
       </View>
       
-      <TouchableOpacity onPress={handleAddTask}>
+      <TouchableOpacity onPress={handleAddTaskk}>
         <Text style={{fontSize:18, backgroundColor: 'blue', width: 130, height: 30, marginLeft:190, color: 'white', marginTop: 10}}>Додати задачу</Text>
       </TouchableOpacity>
     </View>

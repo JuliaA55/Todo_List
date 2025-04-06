@@ -8,25 +8,27 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { cancelNotification } from '../../src/utils/notifications';
 import { Task } from '../../src/types';
+import { useTaskActions } from '../../src/hooks/useTaskActions';
+import { usePendingTaskCount } from '../../src/hooks/usePendingTaskCount';
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
   const router = useRouter();
   const tasks = useSelector((state: RootState) => state.tasks.tasks);
-  const pendingCount = useSelector((state: any) => state.tasks.pendingCount);
-
+  const { handleRemoveTask} = useTaskActions();
+  const pendingTaskCount = usePendingTaskCount();
+  
   useEffect(() => {
     getAllTasks().then(fetched => {
       dispatch(setTasks(fetched));
     });
   }, []);
   
-  const handleDeleteTask = (task: Task) => {
+  const onDeleteTask = (task: Task) => {
     if (task.notificationId) {
       cancelNotification(task.notificationId);
     }
-    deleteTask(task.id);
-    dispatch(removeTask(task.id));
+    handleRemoveTask(task.id);
   };
     
   const handleToggle = (id: number) => {
@@ -37,16 +39,12 @@ export default function HomeScreen() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    deleteTask(id);
-    dispatch(removeTask(id));
-  };
   return (
     <View style={{ flex: 1, backgroundColor: '#c4e7ff'}}>
       <Text style={{fontSize: 24,fontWeight: "bold", textAlign: "center", marginTop: 40, color: "#000"}}>ODOT List</Text>
       <Text style={{fontSize: 16, textAlign: "center",color: "#000",marginBottom: 10}}>4th March 2018</Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 20 }}>
-        <Text style={{ fontSize: 20 }}>Невиконано: {pendingCount}</Text>
+        <Text style={{ fontSize: 20 }}>Невиконано: {pendingTaskCount}</Text>
       </View>
       <FlatList
         data={tasks}
@@ -63,7 +61,7 @@ export default function HomeScreen() {
               <Text style={{ fontWeight: 'bold' }}>{item.todo}</Text>
               <Text>📅 Deadline: {item.deadline}</Text>
               <Text>⚡ Priority: {item.priority}</Text>
-              <TouchableOpacity onPress={() => handleDeleteTask(item)}>
+              <TouchableOpacity onPress={() => onDeleteTask(item)}>
                   <Text style={{ color: 'red' }}>Видалити</Text>
               </TouchableOpacity>
             </View>

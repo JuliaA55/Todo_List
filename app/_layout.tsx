@@ -4,9 +4,7 @@ import { store } from '../src/store';
 import { useEffect } from 'react';
 import { initDB } from '../src/db/database';
 import * as Notifications from 'expo-notifications';
-import { useDispatch } from 'react-redux';
 import { registerForPushNotificationsAsync, setNotificationCategory, cancelNotification } from '../src/utils/notifications';
-import { removeTask } from '../src/features/tasks/tasksSlice';
 import { deleteTask } from '../src/db/database';
 
 Notifications.setNotificationHandler({
