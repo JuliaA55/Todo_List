@@ -4,5 +4,6 @@ export interface Task {
     completed: boolean;
     priority: 'low' | 'medium' | 'high';
     deadline: string;
+    notificationId?: string;
   }
   

@@ -38,6 +38,7 @@ const tasksSlice = createSlice({
     },
     removeTask(state, action: PayloadAction<number>) {
         state.tasks = state.tasks.filter(task => task.id !== action.payload);
+        state.pendingCount -1;
     },
   },
 });

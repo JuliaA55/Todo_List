@@ -6,6 +6,8 @@ import { getAllTasks, toggleTaskStatus, deleteTask } from '../../src/db/database
 import { RootState } from '../../src/store';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { cancelNotification } from '../../src/utils/notifications';
+import { Task } from '../../src/types';
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
@@ -18,7 +20,15 @@ export default function HomeScreen() {
       dispatch(setTasks(fetched));
     });
   }, []);
-
+  
+  const handleDeleteTask = (task: Task) => {
+    if (task.notificationId) {
+      cancelNotification(task.notificationId);
+    }
+    deleteTask(task.id);
+    dispatch(removeTask(task.id));
+  };
+    
   const handleToggle = (id: number) => {
     dispatch(toggleTask(id));
     const task = tasks.find(t => t.id === id);
@@ -53,7 +63,7 @@ export default function HomeScreen() {
               <Text style={{ fontWeight: 'bold' }}>{item.todo}</Text>
               <Text>📅 Deadline: {item.deadline}</Text>
               <Text>⚡ Priority: {item.priority}</Text>
-              <TouchableOpacity onPress={() => handleDelete(item.id)}>
+              <TouchableOpacity onPress={() => handleDeleteTask(item)}>
                   <Text style={{ color: 'red' }}>Видалити</Text>
               </TouchableOpacity>
             </View>
